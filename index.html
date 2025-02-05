@@ -8,9 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
   
   <!-- Подключение Firebase (версия 8.x, можно использовать и 9 modular, но здесь классический синтаксис) -->
-  <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-database.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  
   <style>
     /* Общие стили */
     body {
@@ -284,33 +284,27 @@
     
     /* Сохранение данных таблицы дня в Firebase */
     function saveTable(dayNum) {
-  var table = document.getElementById("dataTable-" + dayNum);
-  var data = [];
-  for (var i = 1; i < table.rows.length; i++) {
-    var row = table.rows[i];
-    data.push({
-      сорт:    row.cells[0].innerText,
-      зеленая: row.cells[1].innerText,
-      жёлтая: row.cells[2].innerText,
-      красная: row.cells[3].innerText,
-      сумма:   row.querySelector('.sum-value').innerText
-    });
-  }
-  // Отладочный вывод: печатаем данные, которые будем сохранять
-  console.log("DEBUG: Данные для сохранения за день " + dayNum + ":", data);
-  // Можно также показать всплывающее окно для отладки (если нужно)
-  // alert("DEBUG: " + JSON.stringify(data, null, 2));
-  
-  // Сохраняем данные в Firebase под путём "tables/dayNum"
-  database.ref('tables/' + dayNum).set(data)
-    .then(function() {
-      alert("Данные за день " + dayNum + " сохранены!");
-    })
-    .catch(function(error) {
-      console.error("Ошибка сохранения: ", error);
-    });
-}
-
+      var table = document.getElementById("dataTable-" + dayNum);
+      var data = [];
+      for (var i = 1; i < table.rows.length; i++) {
+        var row = table.rows[i];
+        data.push({
+          сорт:    row.cells[0].innerText,
+          зеленая: row.cells[1].innerText,
+          жёлтая: row.cells[2].innerText,
+          красная: row.cells[3].innerText,
+          сумма:   row.querySelector('.sum-value').innerText
+        });
+      }
+      // Сохраняем данные в Firebase под путём "tables/dayNum"
+      database.ref('tables/' + dayNum).set(data)
+        .then(function() {
+          alert("Данные за день " + dayNum + " сохранены!");
+        })
+        .catch(function(error) {
+          console.error("Ошибка сохранения: ", error);
+        });
+    }
     
     /* Загрузка данных таблицы дня из Firebase */
     function loadTable(dayNum) {
