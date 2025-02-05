@@ -95,7 +95,7 @@
       position: relative;
     }
     .sum-value {
-      /* Можно добавить стили для текста суммы */
+      /* Можно добавить стили для текста суммы, если необходимо */
     }
     /* Стили для кнопки удаления (большой крестик) */
     .delete-btn {
@@ -149,6 +149,22 @@
     }
   </style>
   <script>
+    /* Функция, разрешающая ввод только цифр (и некоторых управляющих клавиш) */
+    function isNumberKey(evt) {
+      var charCode = (evt.which) ? evt.which : evt.keyCode;
+      // Разрешаем клавиши: backspace (8), tab (9), enter (13), escape (27), стрелки (37-40)
+      if (charCode === 8 || charCode === 9 || charCode === 13 || charCode === 27 ||
+          (charCode >= 37 && charCode <= 40)) {
+        return true;
+      }
+      // Если символ не цифра (код от 48 до 57), то отменяем ввод
+      if (charCode < 48 || charCode > 57) {
+        evt.preventDefault();
+        return false;
+      }
+      return true;
+    }
+
     /* Функция для копирования общего дохода (дополнительно) */
     function copyOverallIncome() {
       var incomeText = document.getElementById("overall-income").innerText;
@@ -221,9 +237,9 @@
       var newRow = document.createElement("tr");
       newRow.innerHTML = `
         <td contenteditable="true">Новый сорт</td>
-        <td contenteditable="true" onblur="updateRowSum(this, '${dayNum}')">0</td>
-        <td contenteditable="true" onblur="updateRowSum(this, '${dayNum}')">0</td>
-        <td contenteditable="true" onblur="updateRowSum(this, '${dayNum}')">0</td>
+        <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">0</td>
+        <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">0</td>
+        <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">0</td>
         <td class="sum-cell">
           <span class="sum-value">0</span>
           <button class="delete-btn" onclick="deleteRow(this, '${dayNum}')"></button>
@@ -277,9 +293,9 @@
           var tr = document.createElement("tr");
           tr.innerHTML = `
             <td contenteditable="true">${rowData["сорт"]}</td>
-            <td contenteditable="true" onblur="updateRowSum(this, '${dayNum}')">${rowData["зеленая"]}</td>
-            <td contenteditable="true" onblur="updateRowSum(this, '${dayNum}')">${rowData["жёлтая"]}</td>
-            <td contenteditable="true" onblur="updateRowSum(this, '${dayNum}')">${rowData["красная"]}</td>
+            <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">${rowData["зеленая"]}</td>
+            <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">${rowData["жёлтая"]}</td>
+            <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">${rowData["красная"]}</td>
             <td class="sum-cell">
               <span class="sum-value">${rowData["сумма"]}</span>
               <button class="delete-btn" onclick="deleteRow(this, '${dayNum}')"></button>
@@ -339,11 +355,11 @@
           <tbody id="tableBody-1">
             <tr>
               <td contenteditable="true">Пример сорта</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '1')">100</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '1')">200</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '1')">300</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '1')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '1')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '1')">0</td>
               <td class="sum-cell">
-                <span class="sum-value">600</span>
+                <span class="sum-value">0</span>
                 <button class="delete-btn" onclick="deleteRow(this, '1')"></button>
               </td>
             </tr>
@@ -375,11 +391,11 @@
           <tbody id="tableBody-2">
             <tr>
               <td contenteditable="true">Пример сорта</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '2')">50</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '2')">150</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '2')">200</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '2')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '2')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '2')">0</td>
               <td class="sum-cell">
-                <span class="sum-value">400</span>
+                <span class="sum-value">0</span>
                 <button class="delete-btn" onclick="deleteRow(this, '2')"></button>
               </td>
             </tr>
@@ -411,11 +427,11 @@
           <tbody id="tableBody-3">
             <tr>
               <td contenteditable="true">Пример сорта</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '3')">120</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '3')">180</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '3')">240</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '3')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '3')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '3')">0</td>
               <td class="sum-cell">
-                <span class="sum-value">540</span>
+                <span class="sum-value">0</span>
                 <button class="delete-btn" onclick="deleteRow(this, '3')"></button>
               </td>
             </tr>
@@ -447,11 +463,11 @@
           <tbody id="tableBody-4">
             <tr>
               <td contenteditable="true">Пример сорта</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '4')">80</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '4')">120</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '4')">160</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '4')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '4')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '4')">0</td>
               <td class="sum-cell">
-                <span class="sum-value">360</span>
+                <span class="sum-value">0</span>
                 <button class="delete-btn" onclick="deleteRow(this, '4')"></button>
               </td>
             </tr>
@@ -483,11 +499,11 @@
           <tbody id="tableBody-5">
             <tr>
               <td contenteditable="true">Пример сорта</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '5')">90</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '5')">110</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '5')">130</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '5')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '5')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '5')">0</td>
               <td class="sum-cell">
-                <span class="sum-value">330</span>
+                <span class="sum-value">0</span>
                 <button class="delete-btn" onclick="deleteRow(this, '5')"></button>
               </td>
             </tr>
@@ -519,11 +535,11 @@
           <tbody id="tableBody-6">
             <tr>
               <td contenteditable="true">Пример сорта</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '6')">70</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '6')">90</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '6')">110</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '6')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '6')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '6')">0</td>
               <td class="sum-cell">
-                <span class="sum-value">270</span>
+                <span class="sum-value">0</span>
                 <button class="delete-btn" onclick="deleteRow(this, '6')"></button>
               </td>
             </tr>
@@ -555,11 +571,11 @@
           <tbody id="tableBody-7">
             <tr>
               <td contenteditable="true">Пример сорта</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '7')">60</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '7')">80</td>
-              <td contenteditable="true" onblur="updateRowSum(this, '7')">100</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '7')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '7')">0</td>
+              <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '7')">0</td>
               <td class="sum-cell">
-                <span class="sum-value">240</span>
+                <span class="sum-value">0</span>
                 <button class="delete-btn" onclick="deleteRow(this, '7')"></button>
               </td>
             </tr>
