@@ -89,16 +89,15 @@
     th {
       background-color: #2A2733;
     }
-    /* В таблице теперь 5 столбцов: "Сорта", "Зеленая", "Жёлтая", "Красная" и "Сумма" */
-    
-    /* В ячейке "Сумма" делаем position: relative, чтобы можно было позиционировать кнопку */
+    /* Таблица состоит из 5 столбцов: "Сорта", "Зеленая", "Жёлтая", "Красная" и "Сумма" */
+    /* В ячейке "Сумма" задаём position: relative для позиционирования кнопки удаления */
     td.sum-cell {
       position: relative;
     }
     .sum-value {
-      /* Можно задать дополнительные стили для текста суммы, если нужно */
+      /* Можно добавить стили для текста суммы */
     }
-    /* Стили для кнопки удаления (крестика) */
+    /* Стили для кнопки удаления (большой крестик) */
     .delete-btn {
       position: absolute;
       right: 5px;
@@ -150,22 +149,22 @@
     }
   </style>
   <script>
+    /* Функция для копирования общего дохода (дополнительно) */
+    function copyOverallIncome() {
+      var incomeText = document.getElementById("overall-income").innerText;
+      navigator.clipboard.writeText(incomeText).then(function() {
+        var elem = document.getElementById("overall-income");
+        elem.style.color = "#BB86FC";
+        elem.style.textShadow = "0 0 15px #BB86FC";
+        setTimeout(function() {
+          elem.style.color = "#E0E0E0";
+          elem.style.textShadow = "none";
+        }, 1000);
+      }).catch(function(err) {
+        console.error('Ошибка при копировании: ', err);
+      });
+    }
 
-    /* Функция для копирования общего дохода */
-function copyOverallIncome() {
-  var incomeText = document.getElementById("overall-income").innerText;
-  navigator.clipboard.writeText(incomeText).then(function() {
-    var elem = document.getElementById("overall-income");
-    elem.style.color = "#BB86FC";
-    elem.style.textShadow = "0 0 15px #BB86FC";
-    setTimeout(function() {
-      elem.style.color = "#E0E0E0";
-      elem.style.textShadow = "none";
-    }, 1000);
-  }).catch(function(err) {
-    console.error('Ошибка при копировании: ', err);
-  });
-}
     /* Функция для показа/скрытия таблицы конкретного дня */
     function toggleStrains(idTable) {
       var container = document.getElementById(idTable);
@@ -240,7 +239,6 @@ function copyOverallIncome() {
 
     /* Функция удаляет строку из таблицы дня dayNum */
     function deleteRow(btn, dayNum) {
-      // Находим ближайший ряд
       var row = btn.closest("tr");
       row.parentElement.removeChild(row);
       var container = document.getElementById("strains-" + dayNum);
@@ -264,15 +262,39 @@ function copyOverallIncome() {
           сумма:   row.querySelector('.sum-value').innerText
         });
       }
-      console.log("Сохранённые данные за день " + dayNum + ":", data);
       localStorage.setItem("tableData-" + dayNum, JSON.stringify(data));
       alert("Данные за день " + dayNum + " сохранены!");
     }
 
-    /* При загрузке страницы обновляем доход для каждого дня и общий доход */
+    /* Функция для загрузки данных таблицы дня dayNum из localStorage */
+    function loadTable(dayNum) {
+      var savedData = localStorage.getItem("tableData-" + dayNum);
+      if (savedData) {
+        var rows = JSON.parse(savedData);
+        var tbody = document.getElementById("tableBody-" + dayNum);
+        tbody.innerHTML = ""; // очищаем текущее содержимое
+        rows.forEach(function(rowData) {
+          var tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td contenteditable="true">${rowData["сорт"]}</td>
+            <td contenteditable="true" onblur="updateRowSum(this, '${dayNum}')">${rowData["зеленая"]}</td>
+            <td contenteditable="true" onblur="updateRowSum(this, '${dayNum}')">${rowData["жёлтая"]}</td>
+            <td contenteditable="true" onblur="updateRowSum(this, '${dayNum}')">${rowData["красная"]}</td>
+            <td class="sum-cell">
+              <span class="sum-value">${rowData["сумма"]}</span>
+              <button class="delete-btn" onclick="deleteRow(this, '${dayNum}')"></button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        updateDayIncome(dayNum);
+      }
+    }
+
+    /* При загрузке страницы загружаем данные таблиц для каждого дня и обновляем общий доход */
     window.addEventListener('DOMContentLoaded', function() {
       for (var day = 1; day <= 7; day++) {
-        updateDayIncome(day);
+        loadTable(day);
       }
       updateOverallIncome();
     });
@@ -295,7 +317,6 @@ function copyOverallIncome() {
   </div>
   <div>
     <h2>Доход по датам:</h2>
-
     <!-- Каждый блок дня содержит заголовок (date-item) и таблицу, которая появляется сразу под ним -->
     <!-- Приведены блоки для дней с 30 января по 5 февраля -->
 
@@ -335,7 +356,6 @@ function copyOverallIncome() {
       </div>
     </div>
 
-    <!-- Аналогичные блоки для остальных дней (2–7) -->
     <!-- День 2: 31 января -->
     <div class="day-container">
       <div id="date-item-2" data-date="31 января" data-income="0" class="date-item" onclick="toggleStrains('strains-2')">
