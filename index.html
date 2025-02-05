@@ -7,7 +7,7 @@
   <!-- Подключение шрифтов -->
   <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
   
-  <!-- Подключение Firebase (версия 8.x) -->
+  <!-- Подключение Firebase (версия 8.x, можно использовать и 9 modular, но здесь классический синтаксис) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
   
@@ -46,13 +46,13 @@
       padding: 20px;
       border-radius: 10px;
       width: 45%;
-      box-shadow: 0px 0px 15px rgba(187,134,252,0.5);
+      box-shadow: 0px 0px 15px rgba(187, 134, 252, 0.5);
       transition: all 0.3s ease-in-out;
     }
     .stat:hover {
       transform: scale(1.05);
     }
-    /* Обёртка для дней – вывод в обратном порядке */
+    /* Обёртка для дней – с обратным порядком (от последней даты к первой) */
     .days-container {
       display: flex;
       flex-direction: column-reverse;
@@ -67,14 +67,14 @@
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease-in-out;
-      box-shadow: 0px 0px 10px rgba(255,255,255,0.2);
+      box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
       margin-bottom: 5px;
     }
     .date-item:hover {
       background: #BB86FC;
       box-shadow: 0px 0px 15px #BB86FC;
     }
-    /* Таблица внутри блока дня */
+    /* Отступ сверху для таблицы внутри блока дня */
     .day-container .strain-list {
       margin-top: 20px;
       max-height: 0;
@@ -100,10 +100,11 @@
     th {
       background-color: #2A2733;
     }
+    /* Таблица состоит из 5 столбцов */
     td.sum-cell {
       position: relative;
     }
-    /* Кнопка удаления (крестик) */
+    /* Стили для кнопки удаления */
     .delete-btn {
       position: absolute;
       right: 5px;
@@ -139,7 +140,7 @@
     .delete-btn:hover::after {
       transform: translate(-50%, -50%) rotate(-135deg);
     }
-    /* Кнопки действий */
+    /* Стили для обычных кнопок */
     button.action {
       margin-top: 10px;
       padding: 10px 20px;
@@ -157,7 +158,7 @@
   
   <script>
     // 1. Инициализация Firebase
-    // Замените данные ниже своими из Firebase Console!
+    // Замените объект firebaseConfig своими данными из Firebase Console!
     var firebaseConfig = {
       apiKey: "AIzaSyATvHD_APbLIxAkGYx8f4sDwzCLdhGjp5Q",
       authDomain: "dasdd-c69a8.firebaseapp.com",
@@ -167,16 +168,18 @@
       messagingSenderId: "1028613232560",
       appId: "1:1028613232560:web:fcf8e82cb0b5aebb806875"
     };
+    // Инициализируем Firebase
     firebase.initializeApp(firebaseConfig);
     var database = firebase.database();
     
     /* Функция, разрешающая ввод только цифр */
     function isNumberKey(evt) {
       var charCode = (evt.which) ? evt.which : evt.keyCode;
+      // Разрешаем управляющие клавиши (backspace, tab, enter, escape, стрелки)
       if (charCode === 8 || charCode === 9 || charCode === 13 || charCode === 27 ||
-          (charCode >= 37 && charCode <= 40)) {
-        return true;
-      }
+    (charCode >= 37 && charCode <= 40)) {
+  return true;
+}
       if (charCode < 48 || charCode > 57) {
         evt.preventDefault();
         return false;
@@ -184,7 +187,7 @@
       return true;
     }
     
-    /* Функция копирования общего дохода (опционально) */
+    /* Функция для копирования общего дохода (опционально) */
     function copyOverallIncome() {
       var incomeText = document.getElementById("overall-income").innerText;
       navigator.clipboard.writeText(incomeText).then(function() {
@@ -210,7 +213,7 @@
       }
     }
     
-    /* Обновление суммы в строке и дохода за день */
+    /* Функция обновления суммы в строке и дохода за день */
     function updateRowSum(cell, dayNum) {
       var row = cell.parentElement;
       var green  = parseFloat(row.cells[1].innerText) || 0;
@@ -221,7 +224,7 @@
       updateDayIncome(dayNum);
     }
     
-    /* Обновление дохода за день (суммируются все значения "Сумма" в таблице) */
+    /* Обновление дохода за день – суммируются все значения столбца "Сумма" */
     function updateDayIncome(dayNum) {
       var table = document.getElementById("dataTable-" + dayNum);
       var total = 0;
@@ -236,7 +239,7 @@
       updateOverallIncome();
     }
     
-    /* Обновление общего дохода */
+    /* Обновление общего дохода (сумма доходов всех дней) */
     function updateOverallIncome() {
       var dayItems = document.querySelectorAll(".date-item");
       var overall = 0;
@@ -246,7 +249,7 @@
       document.getElementById("overall-income").innerText = overall + " бат";
     }
     
-    /* Добавление новой строки в таблицу дня */
+    /* Функция добавления новой строки в таблицу дня */
     function addRow(dayNum) {
       var tbody = document.getElementById("tableBody-" + dayNum);
       var newRow = document.createElement("tr");
@@ -281,27 +284,33 @@
     
     /* Сохранение данных таблицы дня в Firebase */
     function saveTable(dayNum) {
-      var table = document.getElementById("dataTable-" + dayNum);
-      var data = [];
-      for (var i = 1; i < table.rows.length; i++) {
-        var row = table.rows[i];
-        data.push({
-          сорт:    row.cells[0].innerText,
-          зеленая: row.cells[1].innerText,
-          жёлтая: row.cells[2].innerText,
-          красная: row.cells[3].innerText,
-          сумма:   row.querySelector('.sum-value').innerText
-        });
-      }
-      // Сохраняем данные по пути "tables/dayNum"
-      database.ref('tables/' + dayNum).set(data)
-        .then(function() {
-          alert("Данные за день " + dayNum + " сохранены!");
-        })
-        .catch(function(error) {
-          console.error("Ошибка сохранения: ", error);
-        });
-    }
+  var table = document.getElementById("dataTable-" + dayNum);
+  var data = [];
+  for (var i = 1; i < table.rows.length; i++) {
+    var row = table.rows[i];
+    data.push({
+      сорт:    row.cells[0].innerText,
+      зеленая: row.cells[1].innerText,
+      жёлтая: row.cells[2].innerText,
+      красная: row.cells[3].innerText,
+      сумма:   row.querySelector('.sum-value').innerText
+    });
+  }
+  // Отладочный вывод: печатаем данные, которые будем сохранять
+  console.log("DEBUG: Данные для сохранения за день " + dayNum + ":", data);
+  // Можно также показать всплывающее окно для отладки (если нужно)
+  // alert("DEBUG: " + JSON.stringify(data, null, 2));
+  
+  // Сохраняем данные в Firebase под путём "tables/dayNum"
+  database.ref('tables/' + dayNum).set(data)
+    .then(function() {
+      alert("Данные за день " + dayNum + " сохранены!");
+    })
+    .catch(function(error) {
+      console.error("Ошибка сохранения: ", error);
+    });
+}
+
     
     /* Загрузка данных таблицы дня из Firebase */
     function loadTable(dayNum) {
@@ -333,12 +342,14 @@
         });
     }
     
-    /* Функция автоматического добавления нового блока для сегодняшней даты */
+    /* Функция для автоматического добавления нового блока для сегодняшней даты */
     function addTodayIfNotExist() {
+      // Получаем сегодняшнюю дату в формате "DD MMMM" (например, "07 июля" или "05 февраля")
       var today = new Date();
       var options = { day: 'numeric', month: 'long' };
       var todayStr = today.toLocaleDateString("ru-RU", options);
       
+      // Проверяем, есть ли уже date-item с таким значением в data-date
       var exists = false;
       document.querySelectorAll(".date-item").forEach(function(item) {
         if (item.getAttribute("data-date") === todayStr) {
@@ -347,9 +358,11 @@
       });
       
       if (!exists) {
+        // Если сегодня ещё нет в списке, создаём новый блок дня
         var daysContainer = document.querySelector(".days-container");
         var newDayContainer = document.createElement("div");
         newDayContainer.className = "day-container";
+        // Для идентификаторов используем сегодня в формате YYYYMMDD
         var idDate = today.getFullYear() + ("0"+(today.getMonth()+1)).slice(-2) + ("0"+today.getDate()).slice(-2);
         newDayContainer.innerHTML = `
           <div id="date-item-${idDate}" data-date="${todayStr}" data-income="0" class="date-item" onclick="toggleStrains('strains-${idDate}')">
@@ -385,16 +398,23 @@
             </div>
           </div>
         `;
+        // Добавляем новый день в контейнер дней (flex с column-reverse — он появится сверху)
         daysContainer.appendChild(newDayContainer);
       }
     }
     
-    /* При загрузке страницы загружаем данные для каждого дня и обновляем общий доход */
+    /* При загрузке страницы загружаем данные таблиц для каждого дня и обновляем общий доход */
     window.addEventListener('DOMContentLoaded', function() {
+      // Автоматически добавляем блок для сегодняшней даты, если его ещё нет
       addTodayIfNotExist();
+      
+      // Предположим, что у вас уже есть сохранённые данные для дней с 1 по 7,
+      // а также для сегодняшнего дня (если он не совпадает с этими)
+      // Вы можете настроить диапазон загрузки по своему усмотрению.
       var days = document.querySelectorAll(".date-item");
       days.forEach(function(item) {
-        var id = item.id.split("-")[2] || item.id.split("-")[1];
+        // Получаем id дня из идентификатора элемента (например, "date-item-20220507" или просто "1")
+        var id = item.id.split("-")[2] || item.id.split("-")[1]; 
         loadTable(id);
       });
       updateOverallIncome();
@@ -418,11 +438,11 @@
   </div>
   <div>
     <h2>Доход по датам:</h2>
-    <!-- Контейнер для блоков дней -->
+    <!-- Оборачиваем все блоки дней в контейнер -->
     <div class="days-container">
-      <!-- Здесь будут автоматически добавляться блоки дней,
-           сохранённые данные загружаются из Firebase,
-           а функция addTodayIfNotExist добавит блок для сегодняшнего дня, если его нет -->
+      <!-- Здесь будут находиться существующие day-container, загружённые из Firebase, 
+           а функция addTodayIfNotExist добавит блок для сегодняшнего дня, если его ещё нет -->
+      <!-- Например, если ранее были сохранены данные для дней 1,2,3,4,5,6,7, они отобразятся здесь. -->
     </div>
   </div>
 </body>
