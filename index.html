@@ -46,7 +46,7 @@
     .stat:hover {
       transform: scale(1.05);
     }
-    /* Обёртка для дней: используем flex с обратным порядком */
+    /* Обёртка для дней — дни будут выведены в обратном порядке */
     .days-container {
       display: flex;
       flex-direction: column-reverse;
@@ -54,6 +54,9 @@
     /* Стили для блока дня */
     .day-container {
       margin-bottom: 10px; /* Отступ между блоками с датами */
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 5px;
     }
     .date-item {
       background: #1F1B24;
@@ -100,7 +103,7 @@
       position: relative;
     }
     .sum-value {
-      /* Можно добавить стили для текста суммы, если необходимо */
+      /* Стили для текста суммы можно настроить при необходимости */
     }
     /* Стили для кнопки удаления (большой крестик) */
     .delete-btn {
@@ -138,7 +141,7 @@
     .delete-btn:hover::after {
       transform: translate(-50%, -50%) rotate(-135deg);
     }
-    /* Стили для обычных кнопок (например, "Добавить строку", "Сохранить таблицу") */
+    /* Стили для обычных кнопок (например, "Добавить строку", "Сохранить таблицу", "Добавить новый день") */
     button.action {
       margin-top: 10px;
       padding: 10px 20px;
@@ -312,11 +315,68 @@
       }
     }
 
+    /* Функция для добавления нового дня */
+    function addNewDay() {
+      // Запрашиваем название дня (например, дату) у пользователя
+      var dayLabel = prompt("Введите название нового дня (например, '6 февраля'):", "Новый день");
+      if (!dayLabel) return; // если пользователь нажал отмену, ничего не делаем
+
+      // Определяем новый номер дня по количеству уже существующих блоков
+      var daysContainer = document.querySelector(".days-container");
+      var newDayNum = daysContainer.children.length + 1; // если уже есть 7, новый будет 8
+
+      // Создаём новый блок дня (day-container)
+      var dayContainer = document.createElement("div");
+      dayContainer.className = "day-container";
+      dayContainer.innerHTML = `
+        <div id="date-item-${newDayNum}" data-date="${dayLabel}" data-income="0" class="date-item" onclick="toggleStrains('strains-${newDayNum}')">
+          ${dayLabel} - 0 бат
+        </div>
+        <div id="strains-${newDayNum}" class="strain-list">
+          <table id="dataTable-${newDayNum}">
+            <thead>
+              <tr>
+                <th>Сорта</th>
+                <th>Зеленая</th>
+                <th>Жёлтая</th>
+                <th>Красная</th>
+                <th>Сумма</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody-${newDayNum}">
+              <tr>
+                <td contenteditable="true">Пример сорта</td>
+                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${newDayNum}')">0</td>
+                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${newDayNum}')">0</td>
+                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${newDayNum}')">0</td>
+                <td class="sum-cell">
+                  <span class="sum-value">0</span>
+                  <button class="delete-btn" onclick="deleteRow(this, '${newDayNum}')"></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div>
+            <button class="action" onclick="addRow('${newDayNum}')">Добавить строку</button>
+            <button class="action" onclick="saveTable('${newDayNum}')">Сохранить таблицу</button>
+          </div>
+        </div>
+      `;
+      // Добавляем новый блок в контейнер дней
+      daysContainer.appendChild(dayContainer);
+    }
+
     /* При загрузке страницы загружаем данные таблиц для каждого дня и обновляем общий доход */
     window.addEventListener('DOMContentLoaded', function() {
-      for (var day = 1; day <= 7; day++) {
-        loadTable(day);
-      }
+      // Если вы хотите, чтобы существующие дни загружались из сохранённых данных,
+      // убедитесь, что их разметка уже присутствует на странице.
+      // Здесь мы загружаем данные для всех существующих day-container,
+      // а потом обновляем общий доход.
+      var dayContainers = document.querySelectorAll(".day-container");
+      dayContainers.forEach(function(dc, index) {
+        var dayNum = index + 1;
+        loadTable(dayNum);
+      });
       updateOverallIncome();
     });
   </script>
@@ -338,9 +398,11 @@
   </div>
   <div>
     <h2>Доход по датам:</h2>
-    <!-- Оборачиваем все блоки дней в контейнер с обратным порядком -->
+    <!-- Контейнер для всех дней -->
     <div class="days-container">
-      <!-- День 1: 30 января -->
+      <!-- Предварительно здесь могут быть уже добавлены блоки дней, например, для 30 января – 5 февраля -->
+      <!-- Если их нет, то можно добавить их вручную или через кнопку "Добавить новый день" -->
+      <!-- Пример для существующих дней: -->
       <div class="day-container">
         <div id="date-item-1" data-date="30 января" data-income="0" class="date-item" onclick="toggleStrains('strains-1')">
           30 января - 0 бат
@@ -375,223 +437,10 @@
           </div>
         </div>
       </div>
-
-      <!-- День 2: 31 января -->
-      <div class="day-container">
-        <div id="date-item-2" data-date="31 января" data-income="0" class="date-item" onclick="toggleStrains('strains-2')">
-          31 января - 0 бат
-        </div>
-        <div id="strains-2" class="strain-list">
-          <table id="dataTable-2">
-            <thead>
-              <tr>
-                <th>Сорта</th>
-                <th>Зеленая</th>
-                <th>Жёлтая</th>
-                <th>Красная</th>
-                <th>Сумма</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody-2">
-              <tr>
-                <td contenteditable="true">Пример сорта</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '2')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '2')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '2')">0</td>
-                <td class="sum-cell">
-                  <span class="sum-value">0</span>
-                  <button class="delete-btn" onclick="deleteRow(this, '2')"></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div>
-            <button class="action" onclick="addRow('2')">Добавить строку</button>
-            <button class="action" onclick="saveTable('2')">Сохранить таблицу</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- День 3: 1 февраля -->
-      <div class="day-container">
-        <div id="date-item-3" data-date="1 февраля" data-income="0" class="date-item" onclick="toggleStrains('strains-3')">
-          1 февраля - 0 бат
-        </div>
-        <div id="strains-3" class="strain-list">
-          <table id="dataTable-3">
-            <thead>
-              <tr>
-                <th>Сорта</th>
-                <th>Зеленая</th>
-                <th>Жёлтая</th>
-                <th>Красная</th>
-                <th>Сумма</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody-3">
-              <tr>
-                <td contenteditable="true">Пример сорта</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '3')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '3')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '3')">0</td>
-                <td class="sum-cell">
-                  <span class="sum-value">0</span>
-                  <button class="delete-btn" onclick="deleteRow(this, '3')"></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div>
-            <button class="action" onclick="addRow('3')">Добавить строку</button>
-            <button class="action" onclick="saveTable('3')">Сохранить таблицу</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- День 4: 2 февраля -->
-      <div class="day-container">
-        <div id="date-item-4" data-date="2 февраля" data-income="0" class="date-item" onclick="toggleStrains('strains-4')">
-          2 февраля - 0 бат
-        </div>
-        <div id="strains-4" class="strain-list">
-          <table id="dataTable-4">
-            <thead>
-              <tr>
-                <th>Сорта</th>
-                <th>Зеленая</th>
-                <th>Жёлтая</th>
-                <th>Красная</th>
-                <th>Сумма</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody-4">
-              <tr>
-                <td contenteditable="true">Пример сорта</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '4')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '4')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '4')">0</td>
-                <td class="sum-cell">
-                  <span class="sum-value">0</span>
-                  <button class="delete-btn" onclick="deleteRow(this, '4')"></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div>
-            <button class="action" onclick="addRow('4')">Добавить строку</button>
-            <button class="action" onclick="saveTable('4')">Сохранить таблицу</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- День 5: 3 февраля -->
-      <div class="day-container">
-        <div id="date-item-5" data-date="3 февраля" data-income="0" class="date-item" onclick="toggleStrains('strains-5')">
-          3 февраля - 0 бат
-        </div>
-        <div id="strains-5" class="strain-list">
-          <table id="dataTable-5">
-            <thead>
-              <tr>
-                <th>Сорта</th>
-                <th>Зеленая</th>
-                <th>Жёлтая</th>
-                <th>Красная</th>
-                <th>Сумма</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody-5">
-              <tr>
-                <td contenteditable="true">Пример сорта</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '5')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '5')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '5')">0</td>
-                <td class="sum-cell">
-                  <span class="sum-value">0</span>
-                  <button class="delete-btn" onclick="deleteRow(this, '5')"></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div>
-            <button class="action" onclick="addRow('5')">Добавить строку</button>
-            <button class="action" onclick="saveTable('5')">Сохранить таблицу</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- День 6: 4 февраля -->
-      <div class="day-container">
-        <div id="date-item-6" data-date="4 февраля" data-income="0" class="date-item" onclick="toggleStrains('strains-6')">
-          4 февраля - 0 бат
-        </div>
-        <div id="strains-6" class="strain-list">
-          <table id="dataTable-6">
-            <thead>
-              <tr>
-                <th>Сорта</th>
-                <th>Зеленая</th>
-                <th>Жёлтая</th>
-                <th>Красная</th>
-                <th>Сумма</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody-6">
-              <tr>
-                <td contenteditable="true">Пример сорта</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '6')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '6')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '6')">0</td>
-                <td class="sum-cell">
-                  <span class="sum-value">0</span>
-                  <button class="delete-btn" onclick="deleteRow(this, '6')"></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div>
-            <button class="action" onclick="addRow('6')">Добавить строку</button>
-            <button class="action" onclick="saveTable('6')">Сохранить таблицу</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- День 7: 5 февраля -->
-      <div class="day-container">
-        <div id="date-item-7" data-date="5 февраля" data-income="0" class="date-item" onclick="toggleStrains('strains-7')">
-          5 февраля - 0 бат
-        </div>
-        <div id="strains-7" class="strain-list">
-          <table id="dataTable-7">
-            <thead>
-              <tr>
-                <th>Сорта</th>
-                <th>Зеленая</th>
-                <th>Жёлтая</th>
-                <th>Красная</th>
-                <th>Сумма</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody-7">
-              <tr>
-                <td contenteditable="true">Пример сорта</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '7')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '7')">0</td>
-                <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '7')">0</td>
-                <td class="sum-cell">
-                  <span class="sum-value">0</span>
-                  <button class="delete-btn" onclick="deleteRow(this, '7')"></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div>
-            <button class="action" onclick="addRow('7')">Добавить строку</button>
-            <button class="action" onclick="saveTable('7')">Сохранить таблицу</button>
-          </div>
-        </div>
-      </div>
-    </div> <!-- /.days-container -->
+      <!-- Аналогично можно добавить другие дни вручную или через функцию addNewDay() -->
+    </div>
+    <!-- Кнопка для добавления нового дня -->
+    <button class="action" onclick="addNewDay()">Добавить новый день</button>
   </div>
 </body>
 </html>
