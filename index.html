@@ -154,11 +154,11 @@
     }
   </style>
   <script>
-/* Функция, разрешающая ввод только цифр (и некоторых управляющих клавиш) */
+    /* Функция, разрешающая ввод только цифр (и некоторых управляющих клавиш) */
     function isNumberKey(evt) {
       var charCode = (evt.which) ? evt.which : evt.keyCode;
       // Разрешаем клавиши: backspace (8), tab (9), enter (13), escape (27), стрелки (37-40)
-      if (charCode === 8  charCode === 9  charCode === 13  charCode === 27 
+      if (charCode === 8 || charCode === 9 || charCode === 13 || charCode === 27 ||
           (charCode >= 37 && charCode <= 40)) {
         return true;
       }
@@ -235,11 +235,12 @@
       });
       document.getElementById("overall-income").innerText = overall + " бат";
     }
-/* Функция добавляет новую строку в таблицу дня dayNum */
+
+    /* Функция добавляет новую строку в таблицу дня dayNum */
     function addRow(dayNum) {
       var tbody = document.getElementById("tableBody-" + dayNum);
       var newRow = document.createElement("tr");
-      newRow.innerHTML = 
+      newRow.innerHTML = `
         <td contenteditable="true">Новый сорт</td>
         <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">0</td>
         <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">0</td>
@@ -248,7 +249,7 @@
           <span class="sum-value">0</span>
           <button class="delete-btn" onclick="deleteRow(this, '${dayNum}')"></button>
         </td>
-      ;
+      `;
       tbody.appendChild(newRow);
       var container = document.getElementById("strains-" + dayNum);
       if (container.style.maxHeight !== "0px" && container.style.maxHeight !== "") {
@@ -295,7 +296,7 @@
         tbody.innerHTML = ""; // очищаем текущее содержимое
         rows.forEach(function(rowData) {
           var tr = document.createElement("tr");
-          tr.innerHTML = 
+          tr.innerHTML = `
             <td contenteditable="true">${rowData["сорт"]}</td>
             <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">${rowData["зеленая"]}</td>
             <td contenteditable="true" onkeypress="return isNumberKey(event)" onblur="updateRowSum(this, '${dayNum}')">${rowData["жёлтая"]}</td>
@@ -304,13 +305,14 @@
               <span class="sum-value">${rowData["сумма"]}</span>
               <button class="delete-btn" onclick="deleteRow(this, '${dayNum}')"></button>
             </td>
-          ;
+          `;
           tbody.appendChild(tr);
         });
         updateDayIncome(dayNum);
       }
     }
-/* При загрузке страницы загружаем данные таблиц для каждого дня и обновляем общий доход */
+
+    /* При загрузке страницы загружаем данные таблиц для каждого дня и обновляем общий доход */
     window.addEventListener('DOMContentLoaded', function() {
       for (var day = 1; day <= 7; day++) {
         loadTable(day);
@@ -409,7 +411,8 @@
           </div>
         </div>
       </div>
-<!-- День 3: 1 февраля -->
+
+      <!-- День 3: 1 февраля -->
       <div class="day-container">
         <div id="date-item-3" data-date="1 февраля" data-income="0" class="date-item" onclick="toggleStrains('strains-3')">
           1 февраля - 0 бат
@@ -480,7 +483,8 @@
           </div>
         </div>
       </div>
-<!-- День 5: 3 февраля -->
+
+      <!-- День 5: 3 февраля -->
       <div class="day-container">
         <div id="date-item-5" data-date="3 февраля" data-income="0" class="date-item" onclick="toggleStrains('strains-5')">
           3 февраля - 0 бат
@@ -551,7 +555,8 @@
           </div>
         </div>
       </div>
-<!-- День 7: 5 февраля -->
+
+      <!-- День 7: 5 февраля -->
       <div class="day-container">
         <div id="date-item-7" data-date="5 февраля" data-income="0" class="date-item" onclick="toggleStrains('strains-7')">
           5 февраля - 0 бат
