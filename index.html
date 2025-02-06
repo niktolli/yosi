@@ -269,32 +269,43 @@
       updateDayIncome(dayNum);
     }
 
-    /* Функция для сохранения данных таблицы дня dayNum (например, в localStorage) */
     function saveTable(dayNum) {
-      var table = document.getElementById("dataTable-" + dayNum);
-      var data = [];
-      for (var i = 1; i < table.rows.length; i++) {
-        var row = table.rows[i];
-        data.push({
-          сорт:    row.cells[0].innerText,
-          зеленая: row.cells[1].innerText,
-          жёлтая: row.cells[2].innerText,
-          красная: row.cells[3].innerText,
-          сумма:   row.querySelector('.sum-value').innerText
-        });
-      }
-      localStorage.setItem("tableData-" + dayNum, JSON.stringify(data));
-      alert("Данные за день " + dayNum + " сохранены!");
-    }
+  var table = document.getElementById("dataTable-" + dayNum);
+  var data = [];
+  for (var i = 1; i < table.rows.length; i++) {
+    var row = table.rows[i];
+    data.push({
+      сорт: row.cells[0].innerText,
+      зеленая: row.cells[1].innerText,
+      жёлтая: row.cells[2].innerText,
+      красная: row.cells[3].innerText,
+      сумма: row.querySelector('.sum-value').innerText
+    });
+  }
+  
+  // Отладочный вывод (опционально)
+  console.log("Отправляем данные для дня " + dayNum + ":", data);
+  
+  // Отправляем данные через fetch на saveTable.php
+  fetch('saveTable.php?day=' + dayNum, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  })
+  .then(response => response.text())
+  .then(result => alert(result))
+  .catch(error => console.error("Ошибка сохранения:", error));
+}
 
-    /* Функция для загрузки данных таблицы дня dayNum из localStorage */
-    function loadTable(dayNum) {
-      var savedData = localStorage.getItem("tableData-" + dayNum);
+
+function loadTable(dayNum) {
+  fetch('loadTable.php?day=' + dayNum)
+    .then(response => response.json())
+    .then(savedData => {
       if (savedData) {
-        var rows = JSON.parse(savedData);
         var tbody = document.getElementById("tableBody-" + dayNum);
-        tbody.innerHTML = ""; // очищаем текущее содержимое
-        rows.forEach(function(rowData) {
+        tbody.innerHTML = "";
+        savedData.forEach(function(rowData) {
           var tr = document.createElement("tr");
           tr.innerHTML = `
             <td contenteditable="true">${rowData["сорт"]}</td>
@@ -310,9 +321,10 @@
         });
         updateDayIncome(dayNum);
       }
-    }
+    })
+    .catch(error => console.error("Ошибка загрузки данных для дня " + dayNum + ":", error));
+}
 
-    /* При загрузке страницы загружаем данные таблиц для каждого дня и обновляем общий доход */
     window.addEventListener('DOMContentLoaded', function() {
       for (var day = 1; day <= 7; day++) {
         loadTable(day);
